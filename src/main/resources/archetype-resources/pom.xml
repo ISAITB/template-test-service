@@ -7,19 +7,17 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.4</version>
     </parent>
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>${version}</version>
     <properties>
         <!-- Dependency and plugin versions. -->
-        <com.gitb.version>1.23.1</com.gitb.version>
-        <org.apache.cxf.version>4.0.4</org.apache.cxf.version>
-        <com.spotify.dockerfile-maven-plugin.version>1.4.13</com.spotify.dockerfile-maven-plugin.version>
+        <com.gitb.version>1.24.0</com.gitb.version>
+        <org.apache.cxf.version>4.0.5</org.apache.cxf.version>
         <!-- Other properties. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <docker.image.prefix>local</docker.image.prefix>
     </properties>
     <dependencies>
         <dependency>
@@ -60,18 +58,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- Used to build a Docker image if Docker is natively supported. -->
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>${dollar}{com.spotify.dockerfile-maven-plugin.version}</version>
-                <configuration>
-                    <repository>${dollar}{docker.image.prefix}/${dollar}{project.artifactId}</repository>
-                    <buildArgs>
-                        <JAR_FILE>target/${dollar}{project.build.finalName}.jar</JAR_FILE>
-                    </buildArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>

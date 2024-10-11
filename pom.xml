@@ -6,7 +6,7 @@
 
   <groupId>eu.europa.ec.itb</groupId>
   <artifactId>template-test-service</artifactId>
-  <version>1.23.1</version>
+  <version>1.24.0</version>
   <packaging>maven-archetype</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -73,7 +73,7 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>${maven-compiler-plugin.version}</version>
           <configuration>
-            <release>17</release>
+            <release>21</release>
           </configuration>
         </plugin>
         <plugin>

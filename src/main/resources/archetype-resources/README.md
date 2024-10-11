@@ -44,7 +44,7 @@ ${hash} Building and running
 1. Build using `mvn clean package`.
 2. Once built you can run the application in two ways:  
   a. With maven: `mvn spring-boot:run`.  
-  b. Standalone: `java -jar ./target/${artifactId}-VERSION.jar`.
+  b. Standalone: `java -jar ./target/${artifactId}-${version}.jar`.
 
 ${hash}${hash} Live reload for development
 
@@ -56,10 +56,20 @@ ${hash}${hash} Packaging using Docker
 Running this application as a [Docker](https://www.docker.com/) container is very simple as described in Spring Boot's
 [Docker documentation](https://spring.io/guides/gs/spring-boot-docker/). The first step is to 
 [Install Docker](https://docs.docker.com/install/) and ensure it is up and running. You can now build the Docker image
-through Maven:
-1. Build the JAR file with `mvn package`.
-2. Build the Docker image with `mvn dockerfile:build`.
+using the approach that best suits you. Note that in both cases you can adapt as you want the resulting image name.
+
+**Option 1: Using the provided Dockerfile** 
+
+First make sure you build the app by issuing `mvn package`. Once built you can create the image using:
+```
+docker build -t local/${artifactId} --build-arg JAR_FILE=./target/test-service-1.0-SNAPSHOT.jar .
+```
+
+**Option 2: Using the Spring Boot Maven plugin**
+```
+mvn spring-boot:build-image -Dspring-boot.build-image.imageName=local/${artifactId}
+```
 
 ${hash}${hash}${hash} Running the Docker container
 
-Assuming an image name of `local/${artifactId}`, it can be ran using `docker --name ${artifactId} -p 8080:8080 -d local/${artifactId}`.
+Assuming an image name of `local/${artifactId}`, it can be ran using `docker run --name ${artifactId} -p 8080:8080 -d local/${artifactId}`.
