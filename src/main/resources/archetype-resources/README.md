@@ -1,7 +1,7 @@
 #set($hash = '#')
 ${hash} Introduction
 
-This application implements the [GITB test service APIs](https://www.itb.ec.europa.eu/docs/services/latest/) in a  
+This application implements the [GITB test service APIs](https://www.itb.ec.europa.eu/docs/services/latest/) in a
 [Spring Boot](https://spring.io/projects/spring-boot) web application that is meant to support
 [GITB TDL test cases](https://www.itb.ec.europa.eu/docs/tdl/latest/) running in the Interoperability Test Bed. 
 
