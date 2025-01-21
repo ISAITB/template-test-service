@@ -15,7 +15,7 @@
     <properties>
         <!-- Dependency and plugin versions. -->
         <com.gitb.version>1.25.0</com.gitb.version>
-        <org.apache.cxf.version>4.0.5</org.apache.cxf.version>
+        <org.apache.cxf.version>4.1.0</org.apache.cxf.version>
         <!-- Other properties. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
