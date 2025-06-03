@@ -11,12 +11,12 @@
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>Maven archetype for the generation of a GITB-compliant test service application.</description>
-  <url>https://joinup.ec.europa.eu/solution/interoperability-test-bed/about</url>
+  <url>https://interoperable-europe.ec.europa.eu/collection/interoperability-test-bed-repository/solution/interoperability-test-bed</url>
 
   <licenses>
     <license>
       <name>European Union Public Licence (EUPL) Version 1.2</name>
-      <url>https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12</url>
+      <url>https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12</url>
     </license>
   </licenses>
 
@@ -54,8 +54,9 @@
     <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
     <maven-javadoc-plugin.version>3.6.0</maven-javadoc-plugin.version>
     <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
-    <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
     <skipTests>false</skipTests>
+    <autoPublish>true</autoPublish>
   </properties>
 
   <build>
@@ -181,13 +182,14 @@
             </executions>
           </plugin>
           <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>${central-publishing-maven-plugin.version}</version>
             <extensions>true</extensions>
             <configuration>
-              <serverId>ossrh</serverId>
-              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>${autoPublish}</autoPublish>
+              <waitUntil>published</waitUntil>
             </configuration>
           </plugin>
         </plugins>
