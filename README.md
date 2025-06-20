@@ -46,3 +46,18 @@ To use it issue (replacing `VERSION` with the version you want to use):
 ```
 mvn archetype:generate -DarchetypeGroupId=eu.europa.ec.itb -DarchetypeArtifactId=template-test-service -DarchetypeVersion=VERSION
 ```
+
+# Licence
+
+This tool is shared using the [European Union Public Licence (EUPL) version 1.2](https://interoperable-europe.ec.europa.eu/collection/eupl/eupl-text-eupl-12).
+Please refer to [NOTICE.md](NOTICE.md) for more information.
+
+# Legal notice
+
+The authors of this tool waive any and all liability linked to its usage, or the interpretation of results from the 
+downstream software it may be used to produce.
+
+# Contact
+
+For feedback or questions you are invited to post issues in the current repository. In addition,
+feel free to contact the Test Bed team via email at [DIGIT-ITB@ec.europa.eu](mailto:DIGIT-ITB@ec.europa.eu).
