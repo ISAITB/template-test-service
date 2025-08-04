@@ -62,7 +62,7 @@ using the approach that best suits you. Note that in both cases you can adapt as
 
 First make sure you build the app by issuing `mvn package`. Once built you can create the image using:
 ```
-docker build -t local/${artifactId} --build-arg JAR_FILE=./target/test-service-1.0-SNAPSHOT.jar .
+docker build -t local/${artifactId} --build-arg JAR_FILE=./target/${artifactId}-${version}.jar .
 ```
 
 **Option 2: Using the Spring Boot Maven plugin**
