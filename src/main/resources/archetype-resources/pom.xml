@@ -14,7 +14,7 @@
     <version>${version}</version>
     <properties>
         <!-- Dependency and plugin versions. -->
-        <com.gitb.version>1.28.0</com.gitb.version>
+        <com.gitb.version>1.28.1</com.gitb.version>
         <org.apache.cxf.version>4.1.3</org.apache.cxf.version>
         <!-- Other properties. -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
