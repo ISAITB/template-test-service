@@ -1,4 +1,4 @@
-package ${package}.gitb;
+package ${package}.gitb.soap;
 
 import com.gitb.tr.ObjectFactory;
 import org.apache.cxf.Bus;
@@ -14,6 +14,8 @@ import javax.xml.namespace.QName;
 @Configuration
 public class ServiceConfig {
 
+#if($useRestApiOrSoapApi.equalsIgnoreCase("S"))
+#if($addMessagingService.equalsIgnoreCase("Y"))
     /**
      * The CXF endpoint that will serve messaging service calls.
      *
@@ -27,7 +29,9 @@ public class ServiceConfig {
         endpoint.publish("/messaging");
         return endpoint;
     }
+#end
 
+#if($addProcessingService.equalsIgnoreCase("Y"))
     /**
      * The CXF endpoint that will serve processing service calls.
      *
@@ -41,7 +45,9 @@ public class ServiceConfig {
         endpoint.publish("/process");
         return endpoint;
     }
+#end
 
+#if($addValidationService.equalsIgnoreCase("Y"))
     /**
      * The CXF endpoint that will serve validation service calls.
      *
@@ -55,6 +61,8 @@ public class ServiceConfig {
         endpoint.publish("/validation");
         return endpoint;
     }
+#end
+#end
 
     /**
      * The ObjectFactory used to construct GITB classes.
@@ -67,3 +75,4 @@ public class ServiceConfig {
     }
 
 }
+

@@ -1,7 +1,5 @@
-package ${package}.gitb;
+package ${package}.gitb.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -14,16 +12,13 @@ import java.util.UUID;
  * <p/>
  * This class is key in maintaining an overall context across a request and one or more
  * responses. It allows mapping of received data to a given test session running in the
- * test bed.
+ * Test Bed.
  * <p/>
  * This implementation stores session information in memory. An alternative solution
  * that would be fault-tolerant could store test session data in a DB.
  */
 @Component
 public class StateManager {
-
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(StateManager.class);
 
     /** The map of in-memory active sessions. */
     private final Map<String, Map<String, Object>> sessions = new HashMap<>();
@@ -109,9 +104,10 @@ public class StateManager {
      */
     public static class SessionData {
 
-        /** The URL on which the test bed is to be called back. */
+        /** The URL on which the Test Bed is to be called back. */
         public static final String CALLBACK_URL = "callbackURL";
 
     }
 
 }
+

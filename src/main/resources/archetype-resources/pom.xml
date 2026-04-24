@@ -7,19 +7,44 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.13</version>
+        <version>3.5.14</version>
     </parent>
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>${version}</version>
     <properties>
         <!-- Dependency and plugin versions. -->
-        <com.gitb.version>1.29.3</com.gitb.version>
+        <com.gitb.version>1.30.0-SNAPSHOT</com.gitb.version>
+#if($useRestApiOrSoapApi.equalsIgnoreCase("S"))
         <org.apache.cxf.version>4.2.0</org.apache.cxf.version>
+#end
         <!-- Other properties. -->
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+#if($useRestApiOrSoapApi.equalsIgnoreCase("R"))
+        <!-- Dependencies for RESTful GITB services -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.itb</groupId>
+            <artifactId>gitb-types-specs</artifactId>
+            <version>${dollar}{com.gitb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.europa.ec.itb</groupId>
+            <artifactId>gitb-types-model</artifactId>
+            <version>${dollar}{com.gitb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+#else
+        <!-- Dependencies for SOAP-based GITB services -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -34,6 +59,8 @@
             <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
             <version>${dollar}{org.apache.cxf.version}</version>
         </dependency>
+#end
+        <!-- Development dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

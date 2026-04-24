@@ -1,4 +1,4 @@
-package ${package}.gitb;
+package ${package}.gitb.soap;
 
 import com.gitb.core.LogLevel;
 import com.gitb.ms.LogRequest;
@@ -58,7 +58,7 @@ public class TestBedNotifier {
     /**
      * Notify the Test Bed for a given session.
      *
-     * @param sessionId The session ID to notify the test bed for.
+     * @param sessionId The session ID to notify the Test Bed for.
      * @param callId The 'receive' call ID to notify the Test Bed for.
      * @param report The report to notify the Test Bed with.
      */
@@ -68,7 +68,7 @@ public class TestBedNotifier {
             LOG.info("Notifying Test Bed for session [{}]", sessionId);
             callTestBed(sessionId, callId, report, callback);
         } catch (Exception e) {
-            LOG.warn("Error while notifying test bed for session [{}]", sessionId, e);
+            LOG.warn("Error while notifying Test Bed for session [{}]", sessionId, e);
             callTestBed(sessionId, callId, utils.createReport(TestResultType.FAILURE), callback);
             throw new IllegalStateException(e);
         }
@@ -78,7 +78,7 @@ public class TestBedNotifier {
      * Call the Test Bed to notify it of received communication.
      *
      * @param sessionId The session ID that this notification relates to.
-     * @param callId The 'receive' call ID to notify the test bed for.
+     * @param callId The 'receive' call ID to notify the Test Bed for.
      * @param report The TAR report to send back.
      * @param callbackAddress The address on which the call is to be made.
      */

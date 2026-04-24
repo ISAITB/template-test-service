@@ -1,11 +1,11 @@
 package ${package}.web;
 
-import com.gitb.core.ValueEmbeddingEnumeration;
-import com.gitb.tr.TAR;
-import com.gitb.tr.TestResultType;
-import ${package}.gitb.StateManager;
-import ${package}.gitb.TestBedNotifier;
-import ${package}.gitb.Utils;
+import com.gitb.model.core.ValueEmbeddingEnumeration;
+import com.gitb.model.tr.TAR;
+import com.gitb.model.tr.TestResultType;
+import ${package}.gitb.rest.StateManager;
+import ${package}.gitb.rest.TestBedNotifier;
+import ${package}.gitb.rest.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,16 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Simple REST controller to allow an easy way of providing a message for the test bed.
+ * Simple REST controller to allow an easy way of providing a message for the Test Bed.
  * <p/>
- * This implementation acts a sample of how messages could be sent to the test bed. In this case this is done
+ * This implementation acts a sample of how messages could be sent to the Test Bed. In this case this is done
  * via a simple HTTP GET service that accepts two parameters:
  * <ul>
  *     <li>session: The test session ID. Not providing this will send notifications for all active sessions.</li>
  *     <li>message: The message to send. Not providing this will consider an empty string.</li>
  * </ul>
  * One of the key points to define when using a messaging service is the approach to match received messages to
- * waiting test bed sessions. In this example a very simple approach is foreseen, expecting the session ID to be
+ * waiting Test Bed sessions. In this example a very simple approach is foreseen, expecting the session ID to be
  * passed as a parameter (or be omitted to signal all sessions). A more realistic approach would be as follows:
  * <ol>
  *     <li>The messaging service records as part of the state for each session a property that will serve to
@@ -34,7 +34,7 @@ import java.util.List;
  *     <li>Given such an identifier, the current session state is scanned to find the corresponding session.</li>
  * </ol>
  * In addition, keep in mind that the communication protocol involved in sending and receiving messages could be anything.
- * In this example we use a HTTP GET request but this could be an email, a SOAP web service call, a polled endpoint or
+ * In this example we use an HTTP GET request but this could be an email, a REST API call, a polled endpoint or
  * filesystem location; anything that corresponds to the actual messaging needs.
  */
 @RestController
@@ -48,16 +48,16 @@ public class UserInputController {
     private Utils utils = null;
 
     /**
-     * HTTP GET service to receive input for the test bed.
+     * HTTP GET service to receive input for the Test Bed.
      * <p/>
-     * Input received here will be provided back to the test bed as a response to its 'receive' step.
+     * Input received here will be provided back to the Test Bed as a response to its 'receive' step.
      *
      * @param session The test session ID this relates to. Omitting this will consider all active sessions.
      * @param message The message to send. No message will result in an empty string.
      * @return A text configuration message.
      */
     @RequestMapping(value = "/input", method = RequestMethod.GET)
-    public String provideMessage(@RequestParam(value="session", required = false) String session, @RequestParam(value="message", defaultValue = "") String message) {
+    public String provideMessage(@RequestParam(value = "session", required = false) String session, @RequestParam(value = "message", defaultValue = "") String message) {
         List<String> sessionIds = new ArrayList<>();
         if (session == null) {
             // Send message to all current sessions.
@@ -65,14 +65,15 @@ public class UserInputController {
         } else {
             sessionIds.add(session);
         }
-        // Input for the test bed is provided by means of a report.
+        // Input for the Test Bed is provided by means of a report.
         TAR notificationReport = utils.createReport(TestResultType.SUCCESS);
         // The report can include any properties and with any nesting (by nesting list of map types). In this case we add a simple string.
         notificationReport.getContext().getItem().add(utils.createAnyContentSimple("messageReceived", message, ValueEmbeddingEnumeration.STRING));
-        for (String sessionId: sessionIds) {
-            testBedNotifier.notifyTestBed(sessionId, null, (String)stateManager.getSessionInfo(sessionId, StateManager.SessionData.CALLBACK_URL), notificationReport);
+        for (String sessionId : sessionIds) {
+            testBedNotifier.notifyTestBed(sessionId, null, (String) stateManager.getSessionInfo(sessionId, StateManager.SessionData.CALLBACK_URL), notificationReport);
         }
         return String.format("Sent message [%s] to %s session(s)", message, sessionIds.size());
     }
 
 }
+

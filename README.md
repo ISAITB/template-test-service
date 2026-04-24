@@ -15,7 +15,7 @@ The GITB specifications are the result of the
 [CEN Global eBusiness Interoperability Test bed (GITB) Workshop Agreement](http://www.cen.eu/work/areas/ict/ebusiness/pages/ws-gitb.aspx).
 Evolutive maintenance of the GITB specifications and software is now performed by the European Commission's DIGIT under
 the [Interoperable Europe](https://joinup.ec.europa.eu/interoperable-europe) initiative. For more information please
-check the [Interoperability Test Bed's site](https://joinup.ec.europa.eu/solution/interoperability-test-bed/about) on Joinup.
+check the [Interoperability Test Bed's Portal site](https://interoperable-europe.ec.europa.eu/collection/interoperability-test-bed-repository/solution/interoperability-test-bed).
 
 # Build instructions
 

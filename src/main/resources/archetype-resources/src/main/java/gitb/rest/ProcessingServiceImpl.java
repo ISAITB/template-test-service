@@ -1,19 +1,22 @@
 #set($dollar = '$')
-package ${package}.gitb;
+package ${package}.gitb.rest;
 
-import com.gitb.core.ValueEmbeddingEnumeration;
-import com.gitb.ps.Void;
-import com.gitb.ps.*;
-import com.gitb.tr.TestResultType;
+import com.gitb.model.core.*;
+import com.gitb.model.ps.*;
+import com.gitb.model.tr.TestResultType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Spring component that realises the processing service.
  */
-@Component
+@RestController
 public class ProcessingServiceImpl implements ProcessingService {
 
     /** Logger. */
@@ -28,11 +31,11 @@ public class ProcessingServiceImpl implements ProcessingService {
      * Note that defining the implementation of this service is optional, and can be empty unless you plan to publish
      * the service for use by third parties (in which case it serves as documentation on its expected inputs and outputs).
      *
-     * @param parameters No parameters are expected.
      * @return The response.
      */
     @Override
-    public GetModuleDefinitionResponse getModuleDefinition(Void parameters) {
+    @GetMapping("/api/processing/getModuleDefinition")
+    public GetModuleDefinitionResponse getModuleDefinition() {
         return new GetModuleDefinitionResponse();
     }
 
@@ -43,17 +46,19 @@ public class ProcessingServiceImpl implements ProcessingService {
      * <ol>
      *    <li>Check that the requested operation is indeed supported by the service.</li>
      *    <li>For the requested operation collect and check the provided input parameters.</li>
-     *    <li>Perform the requested operation and return the result to the test bed.</li>
+     *    <li>Perform the requested operation and return the result to the Test Bed.</li>
      * </ol>
      *
      * @param processRequest The requested operation and input parameters.
      * @return The result.
      */
     @Override
-    public ProcessResponse process(ProcessRequest processRequest) {
-        LOG.info("Received 'process' command from test bed for session [{}]", processRequest.getSessionId());
+    @PostMapping("/api/processing/process")
+    public ProcessResponse process(@RequestBody ProcessRequest processRequest) {
+        LOG.info("Received 'process' command from Test Bed for session [{}]", processRequest.getSessionId());
         ProcessResponse response = new ProcessResponse();
         response.setReport(utils.createReport(TestResultType.SUCCESS));
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
         String operation = processRequest.getOperation();
         if (operation == null) {
             throw new IllegalArgumentException("No processing operation provided");
@@ -66,6 +71,7 @@ public class ProcessingServiceImpl implements ProcessingService {
         };
         response.getOutput().add(utils.createAnyContentSimple("output", result, ValueEmbeddingEnumeration.STRING));
         LOG.info("Completed operation [{}]. Input was [{}], output was [{}].", operation, input, result);
+#end
         return response;
     }
 
@@ -81,7 +87,8 @@ public class ProcessingServiceImpl implements ProcessingService {
      * @return The response with the generated session ID for the processing transaction.
      */
     @Override
-    public BeginTransactionResponse beginTransaction(BeginTransactionRequest beginTransactionRequest) {
+    @PostMapping("/api/processing/beginTransaction")
+    public BeginTransactionResponse beginTransaction(@RequestBody BeginTransactionRequest beginTransactionRequest) {
         return new BeginTransactionResponse();
     }
 
@@ -92,11 +99,25 @@ public class ProcessingServiceImpl implements ProcessingService {
      * was being recorded to begin with), and to perform any custom cleanup tasks.
      *
      * @param parameters The identifier of the session to terminate.
-     * @return A void response.
      */
     @Override
-    public Void endTransaction(BasicRequest parameters) {
-        return new Void();
+    @PostMapping("/api/processing/endTransaction")
+    public void endTransaction(@RequestBody BasicRequest parameters) {
+    }
+
+    /**
+     * Get the OpenAPI specification for the processing service operations.
+     *
+     * @return The OpenAPI specification for the services.
+     * @throws IOException If an error occurs reading the specification.
+     */
+    @GetMapping(path = "/api/processing", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getOpenApiSpec() throws IOException {
+        try (var is = Thread.currentThread().getContextClassLoader().getResourceAsStream("rest/gitb_ps.json")) {
+            return StreamUtils.copyToString(is, StandardCharsets.UTF_8);
+        }
     }
 
 }
+

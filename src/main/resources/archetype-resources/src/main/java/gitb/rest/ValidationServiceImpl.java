@@ -1,24 +1,24 @@
 #set($dollar = '$')
-package ${package}.gitb;
+package ${package}.gitb.rest;
 
-import com.gitb.core.ValueEmbeddingEnumeration;
-import com.gitb.tr.TAR;
-import com.gitb.tr.TestAssertionGroupReportsType;
-import com.gitb.tr.TestResultType;
-import com.gitb.tr.ValidationCounters;
-import com.gitb.vs.Void;
-import com.gitb.vs.*;
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
+import com.gitb.model.core.*;
+#end
+import com.gitb.model.vs.*;
+import com.gitb.model.tr.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.math.BigInteger;
+import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Spring component that realises the validation service.
  */
-@Component
+@RestController
 public class ValidationServiceImpl implements ValidationService {
 
     /** Logger. **/
@@ -33,63 +33,85 @@ public class ValidationServiceImpl implements ValidationService {
      * Note that defining the implementation of this service is optional, and can be empty unless you plan to publish
      * the service for use by third parties (in which case it serves as documentation on its expected inputs and outputs).
      *
-     * @param parameters No parameters are expected.
      * @return The response.
      */
     @Override
-    public GetModuleDefinitionResponse getModuleDefinition(Void parameters) {
+    @GetMapping("/api/validation/getModuleDefinition")
+    public GetModuleDefinitionResponse getModuleDefinition() {
         return new GetModuleDefinitionResponse();
     }
 
     /**
      * The validate operation is called to validate the input and produce a validation report.
-     *
+     * <p/>
      * The expected input is described for the service's client through the getModuleDefinition call.
      *
      * @param parameters The input parameters and configuration for the validation.
      * @return The response containing the validation report.
      */
     @Override
-    public ValidationResponse validate(ValidateRequest parameters) {
-        LOG.info("Received 'validate' command from test bed for session [{}]", parameters.getSessionId());
+    @PostMapping("/api/validation/validate")
+    public ValidationResponse validate(@RequestBody ValidateRequest parameters) {
+        LOG.info("Received 'validate' command from Test Bed for session [{}]", parameters.getSessionId());
         ValidationResponse result = new ValidationResponse();
         TAR report = utils.createReport(TestResultType.SUCCESS);
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
         // First extract the parameters and check to see if they are as expected.
         String providedText = utils.getRequiredString(parameters.getInput(), "text");
         String expectedText = utils.getRequiredString(parameters.getInput(), "expected");
         boolean mismatchIsError = Boolean.parseBoolean(utils.getOptionalString(parameters.getInput(), "mismatchIsError").orElse("true"));
         // Now do the validation.
-        report.getContext().getItem().add(utils.createAnyContentSimple("text", providedText, ValueEmbeddingEnumeration.STRING));
-        report.getContext().getItem().add(utils.createAnyContentSimple("expected", expectedText, ValueEmbeddingEnumeration.STRING));
-        report.setReports(new TestAssertionGroupReportsType());
-        int infos = 0;
+        report.setContext(AnyContent.builder()
+                        .withItem(AnyContent.builder()
+                                .withName("text")
+                                .withValue(providedText)
+                                .build()
+                        )
+                        .withItem(AnyContent.builder()
+                                .withName("expected")
+                                .withValue(expectedText)
+                                .build()
+                        )
+                        .build()
+        );
         int warnings = 0;
         int errors = 0;
         if (!providedText.equals(expectedText)) {
             if (mismatchIsError) {
                 errors += 1;
-                utils.addReportItemError("The texts do not match.", report.getReports().getInfoOrWarningOrError());
+                report.getItems().add(ReportItem.builder().withDescription("The texts do not match.").withLevel(SeverityLevel.ERROR).build());
             } else {
                 warnings += 1;
-                utils.addReportItemWarning("The texts do not match.", report.getReports().getInfoOrWarningOrError());
+                report.getItems().add(ReportItem.builder().withDescription("The texts do not match.").withLevel(SeverityLevel.WARNING).build());
             }
             if (providedText.equalsIgnoreCase(expectedText)) {
-                infos += 1;
-                utils.addReportItemInfo("The texts match but only when ignoring case.", report.getReports().getInfoOrWarningOrError());
+                report.getItems().add(ReportItem.builder().withDescription("The texts match but only when ignoring case.").withLevel(SeverityLevel.INFO).build());
             }
         }
-        report.setCounters(new ValidationCounters());
-        report.getCounters().setNrOfAssertions(BigInteger.valueOf(infos));
-        report.getCounters().setNrOfWarnings(BigInteger.valueOf(warnings));
-        report.getCounters().setNrOfErrors(BigInteger.valueOf(errors));
         if (errors > 0) {
             report.setResult(TestResultType.FAILURE);
         } else if (warnings > 0) {
             report.setResult(TestResultType.WARNING);
         }
         // Return the report.
+#end
         result.setReport(report);
         return result;
     }
 
+    /**
+     * Get the OpenAPI specification for the validation service operations.
+     *
+     * @return The OpenAPI specification for the services.
+     * @throws IOException If an error occurs reading the specification.
+     */
+    @GetMapping(path = "/api/validation", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String getOpenApiSpec() throws IOException {
+        try (var is = Thread.currentThread().getContextClassLoader().getResourceAsStream("rest/gitb_vs.json")) {
+            return StreamUtils.copyToString(is, StandardCharsets.UTF_8);
+        }
+    }
+
 }
+

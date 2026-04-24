@@ -1,5 +1,5 @@
 #set($dollar = '$')
-package ${package}.gitb;
+package ${package}.gitb.soap;
 
 import com.gitb.ms.Void;
 import com.gitb.ms.*;
@@ -42,7 +42,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     /**
-     * The initiate operation is called by the test bed when a new test session is being prepared.
+     * The initiate operation is called by the Test Bed when a new test session is being prepared.
      * <p/>
      * This call expects from the service to do the following:
      * <ul>
@@ -57,7 +57,7 @@ public class MessagingServiceImpl implements MessagingService {
     @Override
     public InitiateResponse initiate(InitiateRequest parameters) {
         InitiateResponse response = new InitiateResponse();
-        // Get the ReplyTo address for the test bed callbacks based on WS-Addressing.
+        // Get the ReplyTo address for the Test Bed callbacks based on WS-Addressing.
         String replyToAddress = utils.getReplyToAddressFromHeaders(wsContext).orElseThrow();
         // Get the test session ID to use for tracking session state.
         String sessionId = utils.getTestSessionIdFromHeaders(wsContext).orElseThrow();
@@ -67,18 +67,18 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     /**
-     * The receive operation is called when the test bed is expecting to receive a message.
+     * The receive operation is called when the Test Bed is expecting to receive a message.
      * <p/>
-     * The goal here is to be informed by the test bed on the characteristics of the message we are expecting to receive.
+     * The goal here is to be informed by the Test Bed on the characteristics of the message we are expecting to receive.
      * These characteristics would need to be recorded as part of this operation in the service's session state so
      * that incoming messages can be matched against them. Once the expected message is received, the TestBedNotifier
-     * can then be used to ping the test bed.
+     * can then be used to ping the Test Bed.
      * <p/>
      * Besides the expected message's characteristics, the service should also record:
      * <ul>
      *     <li>The test session identifier.</li>
      *     <li>The call identifier (the identifier of the relevant 'receive' step that resulted in this call).</li>
-     *     <li>The callback address of the test bed (this could also be fixed as a configuration property).</li>
+     *     <li>The callback address of the Test Bed (this could also be fixed as a configuration property).</li>
      * </ul>
      *
      * @param parameters The input parameters to consider (if any).
@@ -86,39 +86,41 @@ public class MessagingServiceImpl implements MessagingService {
      */
     @Override
     public Void receive(ReceiveRequest parameters) {
-        LOG.info("Received 'receive' command from test bed for session [{}]", parameters.getSessionId());
+        LOG.info("Received 'receive' command from Test Bed for session [{}]", parameters.getSessionId());
         return new Void();
     }
 
     /**
-     * The send operation is called when the test bed wants to send a message through this service.
+     * The send operation is called when the Test Bed wants to send a message through this service.
      * <p/>
      * This is the point where input is received for the call that this service needs to translate into an actual
      * communication. This communication would be specific to a communication protocol or a separate system's API.
      * <p/>
      * The result of the operation is typically an empty success or failure report depending on whether or not the
      * communication was successful. This report could however include additional information that would be reported
-     * back to the test bed.
+     * back to the Test Bed.
      *
      * @param parameters The input parameters and configuration to consider for the send operation.
-     * @return A status report for the call that will be returned to the test bed.
+     * @return A status report for the call that will be returned to the Test Bed.
      */
     @Override
     public SendResponse send(SendRequest parameters) {
-        LOG.info("Received 'send' command from test bed for session [{}]", parameters.getSessionId());
+        LOG.info("Received 'send' command from Test Bed for session [{}]", parameters.getSessionId());
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
         /*
         At this point we would expect the actual communication or simulation to take place. In this sample implementation
-        we simply log the message received from the test bed.
+        we simply log the message received from the Test Bed.
          */
         String messageToSend = utils.getRequiredString(parameters.getInput(), "messageToSend");
         LOG.info("The message to send is [{}]", messageToSend);
+#end
         SendResponse response = new SendResponse();
         response.setReport(utils.createReport(TestResultType.SUCCESS));
         return response;
     }
 
     /**
-     * The beginTransaction operation is called by the test bed with a transaction starts.
+     * The beginTransaction operation is called by the Test Bed with a transaction starts.
      * <p/>
      * Often there is no need to take any action here but it could be interesting to do so if you need specific
      * actions per transaction.
@@ -145,7 +147,7 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
     /**
-     * The finalize operation is called by the test bed when a test session completes.
+     * The finalize operation is called by the Test Bed when a test session completes.
      * <p/>
      * A typical action that needs to take place here is the cleanup of any resources that were specific to the session
      * in question. This would typically involve the state recorded for the session.
@@ -162,3 +164,4 @@ public class MessagingServiceImpl implements MessagingService {
     }
 
 }
+
