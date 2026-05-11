@@ -1,7 +1,7 @@
 package ${package}.gitb.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import com.gitb.model.core.LogLevel;
 import com.gitb.model.core.LogRequest;
 import com.gitb.model.ms.NotifyForMessageRequest;
@@ -29,7 +29,7 @@ import java.net.http.HttpResponse;
 public class TestBedNotifier {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestBedNotifier.class);
-    private static final ObjectMapper JSON = new ObjectMapper().findAndRegisterModules();
+    private static final JsonMapper JSON = JsonMapper.shared();
 
     @Autowired
     private Utils utils = null;
@@ -62,7 +62,7 @@ public class TestBedNotifier {
                     LOG.warn("Failed to send log message. Status code: {}", response.statusCode());
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialise log request", e);
         } catch (IOException | InterruptedException e) {
             LOG.warn("Error while sending log message for session [{}]", sessionId, e);
@@ -115,7 +115,7 @@ public class TestBedNotifier {
                     LOG.warn("Failed to send notification. Status code: {}", response.statusCode());
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialise notification request", e);
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException("Error while calling Test Bed for session [" + sessionId + "]", e);
