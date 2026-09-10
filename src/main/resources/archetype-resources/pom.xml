@@ -16,7 +16,7 @@
         <!-- Dependency and plugin versions. -->
         <com.gitb.version>1.30.0-SNAPSHOT</com.gitb.version>
 #if($useRestApiOrSoapApi.equalsIgnoreCase("S"))
-        <org.apache.cxf.version>4.2.0</org.apache.cxf.version>
+        <org.apache.cxf.version>4.2.3</org.apache.cxf.version>
 #end
         <!-- Other properties. -->
         <maven.compiler.release>21</maven.compiler.release>
