@@ -1,5 +1,5 @@
 #set($dollar = '$')
-package ${package}.gitb;
+package ${package}.gitb.soap;
 
 import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
 import org.apache.cxf.transport.http.HTTPConduit;
@@ -65,3 +65,4 @@ public class ProxyInfo {
         }
     }
 }
+

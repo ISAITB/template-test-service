@@ -3,9 +3,11 @@ ${hash} Introduction
 
 This application implements the [GITB test service APIs](https://www.itb.ec.europa.eu/docs/services/latest/) in a
 [Spring Boot](https://spring.io/projects/spring-boot) web application that is meant to support
-[GITB TDL test cases](https://www.itb.ec.europa.eu/docs/tdl/latest/) running in the Interoperability Test Bed. 
+[GITB TDL test cases](https://www.itb.ec.europa.eu/docs/tdl/latest/) running in the Interoperability Test Bed.
+#if($addMessagingService.equalsIgnoreCase("Y"))
 
 ${hash}${hash} Messaging service implementation
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
 
 The sample messaging service is used by the Test Bed to send and receive a text message. When told to `send` a message
 this service simply logs it. Regarding received messages, these are provided via HTTP GET call upon which time the
@@ -13,31 +15,59 @@ appropriate active test sessions get notified via callback. To manually complete
 request to http://localhost:8080/input?message=MESSAGE&session=SESSION in which you set the 'MESSAGE' placeholder to the
 text to send back, and the 'SESSION' placeholder to the test session ID to notify. Note that the 'session' parameter can
 be altogether skipped to notify all pending test sessions.
+#end
+#if($useRestApiOrSoapApi.equalsIgnoreCase("R"))
 
-Once running, the messaging endpoint's WDSL is available at http://localhost:8080/services/messaging?WSDL. See
+Once running, the messaging service's REST API root and OpenAPI specs are available at http://localhost:8080/api/messaging. See
 [here](https://www.itb.ec.europa.eu/docs/services/latest/messaging/) for further information on messaging service implementations.
+#else
+
+Once running, the messaging endpoint's WSDL is available at http://localhost:8080/services/messaging?WSDL. See
+[here](https://www.itb.ec.europa.eu/docs/services/latest/messaging/) for further information on messaging service implementations.
+#end
+#end
+#if($addProcessingService.equalsIgnoreCase("Y"))
 
 ${hash}${hash} Processing service implementation
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
 
 The sample processing service is used by the Test Bed to lowercase or uppercase a given text input.
+#end
+#if($useRestApiOrSoapApi.equalsIgnoreCase("R"))
 
-Once running, the processing endpoint's WDSL is available at http://localhost:8080/services/process?WSDL. See 
-[here](https://www.itb.ec.europa.eu/docs/services/latest/processing/) for further information on validation service implementations.
+Once running, the processing service's REST API root and OpenAPI specs are available at http://localhost:8080/api/processing. See
+[here](https://www.itb.ec.europa.eu/docs/services/latest/processing/) for further information on processing service implementations.
+#else
+
+Once running, the processing endpoint's WSDL is available at http://localhost:8080/services/process?WSDL. See
+[here](https://www.itb.ec.europa.eu/docs/services/latest/processing/) for further information on processing service implementations.
+#end
+#end
+#if($addValidationService.equalsIgnoreCase("Y"))
 
 ${hash}${hash} Validation service implementation
+#if($addSampleImplementation.equalsIgnoreCase("Y"))
 
 The sample validation service validates a text against an (also provided) expected value. The user of the service can
 also select whether he/she wants to have a mismatch reported as an error or a warning. Finally, an information message
-is also returned in case values match but when ignoring casing. 
+is also returned in case values match but when ignoring casing.
+#end
+#if($useRestApiOrSoapApi.equalsIgnoreCase("R"))
 
-Once running, the validation endpoint's WDSL is available at http://localhost:8080/services/validation?WSDL. See 
-[here](https://www.itb.ec.europa.eu/docs/services/latest/validation/) for further information on processing service implementations.
+Once running, the validation service's REST API root and OpenAPI specs are available at http://localhost:8080/api/validation. See
+[here](https://www.itb.ec.europa.eu/docs/services/latest/validation/) for further information on validation service implementations.
+#else
+
+Once running, the validation endpoint's WSDL is available at http://localhost:8080/services/validation?WSDL. See
+[here](https://www.itb.ec.europa.eu/docs/services/latest/validation/) for further information on validation service implementations.
+#end
+#end
 
 ${hash} Prerequisites
 
 The following prerequisites are required:
-* To build: JDK 17+, Maven 3.8+.
-* To run: JRE 17+.
+* To build: JDK 21+, Maven 3.8+.
+* To run: JRE 21+.
 
 ${hash} Building and running
 
@@ -54,11 +84,11 @@ Maven, any change in classpath resources is automatically detected to restart th
 ${hash}${hash} Packaging using Docker
 
 Running this application as a [Docker](https://www.docker.com/) container is very simple as described in Spring Boot's
-[Docker documentation](https://spring.io/guides/gs/spring-boot-docker/). The first step is to 
+[Docker documentation](https://spring.io/guides/gs/spring-boot-docker/). The first step is to
 [Install Docker](https://docs.docker.com/install/) and ensure it is up and running. You can now build the Docker image
 using the approach that best suits you. Note that in both cases you can adapt as you want the resulting image name.
 
-**Option 1: Using the provided Dockerfile** 
+**Option 1: Using the provided Dockerfile**
 
 First make sure you build the app by issuing `mvn package`. Once built you can create the image using:
 ```

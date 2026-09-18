@@ -1,24 +1,15 @@
-package ${package}.gitb;
+package ${package}.gitb.rest;
 
-import com.gitb.core.*;
-import com.gitb.tr.*;
-import com.gitb.tr.ObjectFactory;
-import jakarta.xml.ws.WebServiceContext;
-import org.w3c.dom.Element;
-import org.apache.cxf.headers.Header;
+import com.gitb.model.core.*;
+import com.gitb.model.tr.*;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.xml.bind.JAXBElement;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.*;
+import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.function.Function;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Class containing utility methods.
@@ -26,33 +17,26 @@ import java.util.function.Function;
 @Component
 public class Utils {
 
-    /** SOAP header name for the ReplyTo address. */
-    public static final QName REPLY_TO_QNAME = new QName("http://www.w3.org/2005/08/addressing", "ReplyTo");
-    /** SOAP header name for the test session ID. */
-    public static final QName TEST_SESSION_ID_QNAME = new QName("http://www.gitb.com", "TestSessionIdentifier", "gitb");
+    /** HTTP header name for the ReplyTo address. */
+    private static final String REPLY_TO_HEADER = "Gitb-Reply-To";
+    /** HTTP header name for the test session ID. */
+    public static final String TEST_SESSION_ID_HEADER = "Gitb-Test-Session-Identifier";
 
-    @Autowired
-    private ObjectFactory objectFactory;
 
     /**
      * Create a report for the given result.
-     *
+     * <p/>
      * This method creates the report, sets its time and constructs an empty context map to return values with.
      *
      * @param result The overall result of the report.
      * @return The report.
      */
     public TAR createReport(TestResultType result) {
-        TAR report = new TAR();
-        report.setContext(new AnyContent());
-        report.getContext().setType("map");
-        report.setResult(result);
-        try {
-            report.setDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
-        } catch (DatatypeConfigurationException e) {
-            throw new IllegalStateException(e);
-        }
-        return report;
+        return TAR.builder()
+                .withContext(AnyContent.builder().withType("map").build())
+                .withResult(result)
+                .withDate(ZonedDateTime.now())
+                .build();
     }
 
     /**
@@ -66,13 +50,13 @@ public class Utils {
      * @return The created parameter.
      */
     public TypedParameter createParameter(String name, String type, UsageEnumeration use, ConfigurationType kind, String description) {
-        TypedParameter parameter =  new TypedParameter();
-        parameter.setName(name);
-        parameter.setType(type);
-        parameter.setUse(use);
-        parameter.setKind(kind);
-        parameter.setDesc(description);
-        return parameter;
+        return TypedParameter.builder()
+                .withName(name)
+                .withType(type)
+                .withUse(use)
+                .withKind(kind)
+                .withDesc(description)
+                .build();
     }
 
     /**
@@ -108,7 +92,7 @@ public class Utils {
         } else if (inputs.size() > 1) {
             throw new IllegalArgumentException(String.format("Multiple inputs named [%s] were found when only one was expected.", inputName));
         }
-        return inputs.get(0);
+        return inputs.getFirst();
     }
 
     /**
@@ -125,7 +109,7 @@ public class Utils {
         } else if (inputs.size() > 1) {
             throw new IllegalArgumentException(String.format("Multiple inputs named [%s] were found when at most one was expected.", inputName));
         } else {
-            return Optional.of(inputs.get(0));
+            return Optional.of(inputs.getFirst());
         }
     }
 
@@ -143,16 +127,12 @@ public class Utils {
             return new String(Base64.getDecoder().decode(content.getValue()));
         } else if (content.getEmbeddingMethod() == ValueEmbeddingEnumeration.URI) {
             // Value provided as URI to look up.
-            try {
-                var request = HttpRequest.newBuilder()
-                        .uri(new URI(content.getValue()))
-                        .GET()
-                        .build();
-                return HttpClient.newHttpClient()
-                        .send(request, HttpResponse.BodyHandlers.ofString())
-                        .body();
-            } catch (URISyntaxException e) {
-                throw new IllegalArgumentException(String.format("The provided value [%s] was not a valid URI.", content.getValue()), e);
+            var request = HttpRequest.newBuilder()
+                    .uri(URI.create(content.getValue()))
+                    .GET()
+                    .build();
+            try (var client = HttpClient.newHttpClient()) {
+                return client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             } catch (IOException | InterruptedException e) {
                 throw new IllegalArgumentException(String.format("Error while calling URI [%s]", content.getValue()), e);
             }
@@ -187,16 +167,12 @@ public class Utils {
             return Base64.getDecoder().decode(input.getValue());
         } else if (input.getEmbeddingMethod() == ValueEmbeddingEnumeration.URI) {
             // Remote URI to read from.
-            try {
-                var request = HttpRequest.newBuilder()
-                        .uri(new URI(input.getValue()))
-                        .GET()
-                        .build();
-                return HttpClient.newHttpClient()
-                        .send(request, HttpResponse.BodyHandlers.ofByteArray())
-                        .body();
-            } catch (URISyntaxException e) {
-                throw new IllegalArgumentException(String.format("The provided value [%s] was not a valid URI.", input.getValue()), e);
+            var request = HttpRequest.newBuilder()
+                    .uri(URI.create(input.getValue()))
+                    .GET()
+                    .build();
+            try (var client = HttpClient.newHttpClient()) {
+                return client.send(request, HttpResponse.BodyHandlers.ofByteArray()).body();
             } catch (IOException | InterruptedException e) {
                 throw new IllegalArgumentException(String.format("Error while calling URI [%s]", input.getValue()), e);
             }
@@ -226,105 +202,32 @@ public class Utils {
      * @return The value.
      */
     public AnyContent createAnyContentSimple(String name, String value, ValueEmbeddingEnumeration embeddingMethod) {
-        AnyContent input = new AnyContent();
-        input.setName(name);
-        input.setValue(value);
-        input.setType("string");
-        input.setEmbeddingMethod(embeddingMethod);
-        return input;
+        return AnyContent.builder()
+                .withName(name)
+                .withValue(value)
+                .withEmbeddingMethod(embeddingMethod)
+                .build();
     }
 
     /**
-     * Parse the received SOAP headers to retrieve the "reply-to" address.
+     * Parse the received HTTP headers to retrieve the "reply-to" address.
      *
-     * @param context The call's context.
+     * @param request The HTTP request.
      * @return The header's value.
      */
-    public Optional<String> getReplyToAddressFromHeaders(WebServiceContext context) {
-        return getHeaderAsString(context, REPLY_TO_QNAME).map(h -> {
-            if (h.endsWith("?wsdl")) {
-                return h;
-            } else {
-                return h + "?wsdl";
-            }
-        });
+    public Optional<String> getReplyToAddressFromHeaders(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(REPLY_TO_HEADER));
     }
 
     /**
-     * Parse the received SOAP headers to retrieve the test session identifier.
+     * Parse the received HTTP headers to retrieve the test session identifier.
      *
-     * @param context The call's context.
+     * @param request The HTTP request.
      * @return The header's value.
      */
-    public Optional<String> getTestSessionIdFromHeaders(WebServiceContext context) {
-        return getHeaderAsString(context, TEST_SESSION_ID_QNAME);
-    }
-
-    /**
-     * Extract a value from the SOAP headers.
-     *
-     * @param name The name of the header to locate.
-     * @param valueExtractor The function used to extract the data.
-     * @return The extracted data.
-     * @param <T> The type of data extracted.
-     */
-    public <T> T getHeaderValue(WebServiceContext context, QName name, Function<Header, T> valueExtractor) {
-        return ((List<Header>) context.getMessageContext().get(Header.HEADER_LIST))
-                .stream()
-                .filter(header -> name.equals(header.getName())).findFirst()
-                .map(valueExtractor).orElse(null);
-    }
-
-    /**
-     * Get the specified header element as a string.
-     *
-     * @param name The name of the header element to lookup.
-     * @return The text value of the element.
-     */
-    public Optional<String> getHeaderAsString(WebServiceContext context, QName name) {
-        return Optional.ofNullable(getHeaderValue(context, name, (header) -> ((Element) header.getObject()).getTextContent().trim()));
-    }
-
-    /**
-     * Add an information message to the report.
-     *
-     * @param message The message.
-     * @param reportItems The report's items.
-     */
-    public void addReportItemInfo(String message, List<JAXBElement<TestAssertionReportType>> reportItems) {
-        reportItems.add(objectFactory.createTestAssertionGroupReportsTypeInfo(createReportItemContent(message)));
-    }
-
-    /**
-     * Add a warning message to the report.
-     *
-     * @param message The message.
-     * @param reportItems The report's items.
-     */
-    public void addReportItemWarning(String message, List<JAXBElement<TestAssertionReportType>> reportItems) {
-        reportItems.add(objectFactory.createTestAssertionGroupReportsTypeWarning(createReportItemContent(message)));
-    }
-
-    /**
-     * Add an error message to the report.
-     *
-     * @param message The message.
-     * @param reportItems The report's items.
-     */
-    public void addReportItemError(String message, List<JAXBElement<TestAssertionReportType>> reportItems) {
-        reportItems.add(objectFactory.createTestAssertionGroupReportsTypeError(createReportItemContent(message)));
-    }
-
-    /**
-     * Create the internal content of a report's item.
-     *
-     * @param message The message.
-     * @return The content to wrap.
-     */
-    private BAR createReportItemContent(String message) {
-        BAR itemContent = new BAR();
-        itemContent.setDescription(message);
-        return itemContent;
+    public Optional<String> getTestSessionIdFromHeaders(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader(TEST_SESSION_ID_HEADER));
     }
 
 }
+
