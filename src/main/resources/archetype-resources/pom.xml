@@ -7,14 +7,14 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
     <groupId>${groupId}</groupId>
     <artifactId>${artifactId}</artifactId>
     <version>${version}</version>
     <properties>
         <!-- Dependency and plugin versions. -->
-        <com.gitb.version>1.30.2</com.gitb.version>
+        <com.gitb.version>1.30.3</com.gitb.version>
 #if($useRestApiOrSoapApi.equalsIgnoreCase("S"))
         <org.apache.cxf.version>4.2.4</org.apache.cxf.version>
 #end
